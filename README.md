@@ -20,6 +20,7 @@ La aplicación permite:
 - Escribir reseñas y almacenarlas en una “base de datos” simulada en memoria (sesión de Streamlit).
 - Analizar el sentimiento de un texto (positivo/negativo/neutral) desde la UI usando gRPC.
 - Visualizar métricas básicas de las reseñas capturadas.
+- Analizar un archivo (CSV/XLSX) vía gRPC en lote y descargar un CSV con predicciones.
 - Registrar el pipeline del modelo y una inferencia de validación en MLflow al iniciar el servicio gRPC.
 
 Tecnologías clave:
@@ -100,16 +101,13 @@ En el compose incluido, el servicio mlflow usa la imagen base de Python y no tie
 4) Logs
 - docker compose logs -f grpc streamlit
 
-Nota importante sobre mayúsculas/minúsculas en rutas (Linux/macOS): el compose actual hace referencia a app/main.py en minúsculas, pero el directorio del repo es App con ‘A’ mayúscula. En sistemas case-sensitive deberás:
-- Cambiar en docker-compose.yaml la ruta a App/main.py, o
-- Renombrar el directorio a app (y también ML -> ml) y ajustar imports correspondientes, o
-- Ajustar App/main.py para que añada "ML" (mayúscula) al sys.path en lugar de "ml", si ejecutas dentro de contenedor Linux.
+Nota importante sobre mayúsculas/minúsculas en rutas (Linux/macOS): este repositorio usa App y ML en mayúsculas. docker-compose.yaml ya referencia App/main.py correctamente. Además, App/main.py añade ambos paths (ML y ml) al sys.path para compatibilidad, pero se recomienda mantener App y ML en mayúsculas de forma consistente en disco y en las referencias.
 
 
 ## Arquitectura del software
 Componentes:
 - Interfaz (Streamlit) – App/main.py
-  - Tabs: Escribir Reseña, Análisis IA, Base de Datos.
+  - Tabs: Escribir Reseña, Análisis IA, Base de Datos, Archivo.
   - Cliente gRPC: consume Predict, PredictBatch y Ping del servicio.
   - Variable APP_GRPC_ADDR para apuntar al host:puerto del servicio.
 - Servicio IA (gRPC) – ML/server.py

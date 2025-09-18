@@ -10,9 +10,10 @@ import pandas as pd
 # --- gRPC ---
 import grpc
 
-# Asegura que Python encuentre los stubs generados en ml/
+# Asegura que Python encuentre los stubs generados en ML/ml
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path.append(str(ROOT / "ml"))
+# Preferir ML (mayúsculas), pero incluir ambos para entornos case-sensitive
+sys.path.extend([str(ROOT / "ML"), str(ROOT / "ml")])
 
 # Intento de import de stubs gRPC; si falla, la UI sigue pero desactiva funciones que dependen de gRPC
 try:
@@ -167,22 +168,6 @@ def apply_custom_css():
     )
 
 
-# --------- Lectura de archivos ----------
-def read_table(file) -> pd.DataFrame:
-    """
-    Lee CSV o XLSX y retorna DataFrame con columna 'texto' obligatoria.
-    Elimina filas vacías y fuerza a string.
-    """
-    name = file.name.lower()
-    if name.endswith(".csv"):
-        df = pd.read_csv(file)
-    else:
-        df = pd.read_excel(file)
-    if "texto" not in df.columns:
-        raise ValueError("El archivo debe tener una columna llamada 'texto'.")
-    df = df.dropna(subset=["texto"]).copy()
-    df["texto"] = df["texto"].astype(str)
-    return df
 
 
 # --------- UI: Escribir reseña ----------

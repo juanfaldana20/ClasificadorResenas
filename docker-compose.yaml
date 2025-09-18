@@ -14,7 +14,7 @@ services:
   streamlit:
     build: .
     container_name: sentiment_ui
-    command: streamlit run app/main.py --server.port 8501 --server.address 0.0.0.0
+    command: streamlit run App/main.py --server.port 8501 --server.address 0.0.0.0
     ports:
       - "8501:8501"
     volumes:
