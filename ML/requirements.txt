@@ -1,0 +1,10 @@
+transformers==4.44.2
+torch>=2.2
+accelerate>=0.33
+tokenizers>=0.15
+grpcio>=1.65
+grpcio-tools>=1.65
+protobuf>=4.25
+mlflow>=2.14
+pandas>=2.2
+scikit-learn>=1.4
