@@ -1,23 +1,21 @@
-# Imagen base de Python
-FROM python:3.10-slim
+# Imagen base
+FROM python:3.11-slim
 
-# Evitar que Python cree archivos __pycache__ y buffers
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# Crear directorio de trabajo dentro del contenedor
+# Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiar requirements
+# Copiar archivos de requerimientos
 COPY requirements.txt .
 
 # Instalar dependencias
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiamos el resto de la app
-COPY src/ ./src/
-COPY conv_MLP_84.h5 ./  
+# Copiar el resto del proyecto
+COPY . .
 
-CMD ["python", "src/app.py"]
+# Exponer puertos (gRPC, Streamlit, MLflow)
+EXPOSE 50051 8501 5000
 
+# Comando por defecto (se sobrescribirá en docker-compose)
+CMD ["bash"]

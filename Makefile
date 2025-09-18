@@ -21,7 +21,7 @@ server:
 
 # Ejecutar cliente Streamlit
 aplicacion:
-	$(PY) -m streamlit run ML/app.py
+	$(PY) -m streamlit run App/main.py
 
 # Limpiar MLflow
 limpiar_mlflow:
@@ -44,8 +44,8 @@ shell:
 
 # Inicio rápido: servidor + app + mlflow UI
 inicio_rapido:
-	powershell -Command "& {Start-Process -NoNewWindow -FilePath '$(PY)' -ArgumentList 'ML/server.py'}"
-	powershell -Command "& {Start-Process -NoNewWindow -FilePath '$(PY)' -ArgumentList '-m streamlit run App/main.py'}"
+	powershell -Command "& {Start-Process -NoNewWindow -FilePath '$(PY)' -ArgumentList 'appML/server.py'}"
+	powershell -Command "& {Start-Process -NoNewWindow -FilePath '$(PY)' -ArgumentList '-m streamlit run app/main.py'}"
 	powershell -Command "& {Start-Process -NoNewWindow -FilePath 'mlflow' -ArgumentList 'ui'}"
 
 

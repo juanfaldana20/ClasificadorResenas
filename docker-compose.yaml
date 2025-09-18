@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  grpc:
+    build: .
+    container_name: sentiment_grpc
+    command: python ML/server.py
+    ports:
+      - "50051:50051"
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+  streamlit:
+    build: .
+    container_name: sentiment_ui
+    command: streamlit run app/main.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    environment:
+      - APP_GRPC_ADDR=grpc:50051
+    depends_on:
+      - grpc
+    restart: unless-stopped
+
+  mlflow:
+    image: python:3.11-slim
+    container_name: sentiment_mlflow
+    working_dir: /app
+    volumes:
+      - ./mlruns:/app/mlruns
+    command: mlflow ui --host 0.0.0.0 --port 5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - grpc
+    restart: unless-stopped
