@@ -14,6 +14,10 @@ Aplicación para gestionar y analizar reseñas de restaurantes con apoyo de IA. 
 - Tablero Kanban
 - Notas y solución de problemas (FAQ)
 
+## Enlace de documento y video:
+  - Doc: https://uao-my.sharepoint.com/:w:/g/personal/daniel_san_munoz_uao_edu_co/ETTYTWK7veNArC-rCeOSQcgBHVAOxTm1XlHYnxhh1tCIQA?rtime=BFQrfCH33Ug
+  - Video: https://youtu.be/mlT7p9Y7n7o
+
 
 ## Descripción del proyecto
 La aplicación permite:
@@ -163,3 +167,5 @@ Enlace al tablero Kanban del proyecto:
   - Usa la opción A (local) o ajusta el servicio mlflow del compose como se describe.
 - Puertos ocupados:
   - Cambia los puertos mapeados en docker-compose.yaml o al ejecutar mlflow y streamlit.
+ 
+
