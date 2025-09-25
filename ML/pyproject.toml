@@ -9,7 +9,8 @@ dependencies = [
     "grpcio-tools>=1.65.0",
     "transformers>=4.44.0",
     "torch>=2.3.0",
-    "pytest==8.4.2"
+    "pytest==8.4.2",
+    "streamlit==1.50.0"
 ]
 
 [build-system]
