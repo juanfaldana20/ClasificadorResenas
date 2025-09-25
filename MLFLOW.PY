@@ -1,64 +1,79 @@
-# compare_models.py
+# mlflow_eval.py
 import os
 import mlflow
 import mlflow.transformers
-from transformers import pipeline
-from datasets import load_dataset
+import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
+from transformers import pipeline
 
-# 1) Modelos a comparar
-MODELS = [
-    "finiteautomata/beto-sentiment-analysis",          # Español
-    "nlptown/bert-base-multilingual-uncased-sentiment", # Multilingüe
-    "distilbert-base-uncased-finetuned-sst-2-english"   # Inglés
-]
+# -------------------------
+# 1. Cargar dataset local
+# -------------------------
+df = pd.read_csv("reseñas.csv")  # columnas: text,label
 
-# 2) Dataset de reseñas (usaremos IMDb, inglés; para español se puede usar otro)
-dataset = load_dataset("imdb")
-test_data = dataset["test"].shuffle(seed=42).select(range(200))  # 200 ejemplos para demo
+# Mapear etiquetas a enteros
+label_map = {"NEG": 0, "NEU": 1, "POS": 2}
+df["label_id"] = df["label"].map(label_map)
 
-# 3) Configurar experimento
-exp_name = os.getenv("MLFLOW_EXPERIMENT_NAME", "sentiment-comparison")
-mlflow.set_experiment(exp_name)
+# Dividir en train/test (aunque no entrenamos, solo usamos test)
+test_df = df.sample(frac=0.2, random_state=42)
 
+# -------------------------
+# 2. Función de evaluación
+# -------------------------
 def evaluate_model(model_id):
-    """Evalúa un modelo Hugging Face y guarda resultados en MLflow"""
+    """Evalúa un modelo Hugging Face ya entrenado en tu dataset local"""
+    print(f"\n🔹 Evaluando modelo: {model_id}")
     clf = pipeline("sentiment-analysis", model=model_id)
 
-    # Abrir un run en MLflow
+    y_true = []
+    y_pred = []
+
+    for _, row in test_df.iterrows():
+        text, label = row["text"], row["label_id"]
+        result = clf(text[:512])[0]  # truncamos a 512 tokens
+        pred_label = result["label"].upper()
+
+        # Normalizar salida del modelo a nuestro esquema NEG/NEU/POS
+        if pred_label.startswith("NEG"):
+            pred = 0
+        elif pred_label.startswith("NEU"):
+            pred = 1
+        else:
+            pred = 2
+
+        y_true.append(label)
+        y_pred.append(pred)
+
+    # Calcular métricas
+    acc = accuracy_score(y_true, y_pred)
+    f1 = f1_score(y_true, y_pred, average="weighted")
+
+    print(f"📊 Resultados {model_id}: Accuracy={acc:.3f}, F1={f1:.3f}")
+
+    # Log en MLflow
     with mlflow.start_run(run_name=model_id):
         mlflow.log_param("huggingface_model_id", model_id)
-
-        y_true = []
-        y_pred = []
-
-        for example in test_data:
-            text = example["text"]
-            label = 1 if example["label"] == 1 else 0  # IMDb: 0=neg, 1=pos
-
-            result = clf(text[:512])[0]  # truncamos textos largos
-            pred = 1 if result["label"].upper().startswith("POS") else 0
-
-            y_true.append(label)
-            y_pred.append(pred)
-
-        # Calcular métricas
-        acc = accuracy_score(y_true, y_pred)
-        f1 = f1_score(y_true, y_pred)
-
-        # Registrar métricas en MLflow
         mlflow.log_metric("accuracy", acc)
         mlflow.log_metric("f1_score", f1)
 
-        # Guardar modelo en MLflow
         mlflow.transformers.log_model(
             transformers_model=clf,
             artifact_path="model",
             task="sentiment-analysis",
         )
 
-        print(f"Modelo {model_id} -> Accuracy={acc:.3f}, F1={f1:.3f}")
-
+# -------------------------
+# 3. Ejecutar comparación
+# -------------------------
 if __name__ == "__main__":
-    for m in MODELS:
-        evaluate_model(m)
+    os.environ["MLFLOW_EXPERIMENT_NAME"] = "comparacion_beto_distilbert"
+
+    # Modelos en español
+    modelos = [
+        "finiteautomata/beto-sentiment-analysis",   # BETO fine-tuned español
+        "distilbert-base-uncased-finetuned-sst-2-english" # DistilBERT español fine-tuned
+    ]
+
+    for modelo in modelos:
+        evaluate_model(modelo)

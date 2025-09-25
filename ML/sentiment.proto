@@ -1,0 +1,30 @@
+syntax = "proto3";
+package sentiment.v1;
+
+// Clasificación con BETO: POS / NEG / NEU
+service SentimentService {
+  rpc Predict (PredictRequest) returns (PredictResponse);
+  rpc PredictBatch (PredictBatchRequest) returns (PredictBatchResponse);
+  rpc Ping (PingRequest) returns (PingResponse);
+}
+
+message PredictRequest {
+  string text = 1;
+}
+
+message PredictResponse {
+  string label = 1;   // "POS" | "NEG" | "NEU"
+  double score = 2;   // confianza 0..1
+}
+
+message PredictBatchRequest {
+  repeated string texts = 1; // lista de textos
+}
+
+message PredictBatchResponse {
+  repeated string labels = 1;  // alineado con texts
+  repeated double scores = 2;  // alineado con texts
+}
+
+message PingRequest {}
+message PingResponse { string status = 1; } // "ok"

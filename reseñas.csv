@@ -1,0 +1,98 @@
+text,label
+"El producto llegó a tiempo y funciona perfectamente",POS
+"No me gustó para nada, pésima calidad",NEG
+"El servicio estuvo bien, aunque un poco lento",NEU
+"Me encantó la experiencia, repetiría sin duda",POS
+"La comida estaba fría y sin sabor",NEG
+"El hotel estaba limpio y bien ubicado",POS
+"No volveré a comprar aquí, terrible atención",NEG
+"El envío tardó lo esperado, nada especial",NEU
+"Excelente calidad, mejor de lo que esperaba",POS
+"El celular se dañó a los dos días de uso",NEG
+"Todo estuvo correcto, sin sorpresas",NEU
+"El profesor explica muy claro y con paciencia",POS
+"Las instrucciones eran confusas y no funcionaron",NEG
+"Fue una experiencia normal, nada destacable",NEU
+"Me hicieron sentir muy bien atendido",POS
+"La aplicación se cierra cada vez que la abro",NEG
+"El curso fue interesante pero muy corto",NEU
+"Superó mis expectativas totalmente",POS
+"El producto llegó roto y defectuoso",NEG
+"La película estuvo aceptable, aunque un poco larga",NEU
+"Qué gran compra, estoy feliz con el resultado",POS
+"La batería del portátil no dura nada",NEG
+"Es un lugar tranquilo para descansar",NEU
+"El servicio al cliente fue increíble",POS
+"El software está lleno de errores",NEG
+"El libro fue entretenido pero predecible",NEU
+"Estoy muy satisfecho con esta compra",POS
+"La entrega fue un desastre, nunca llegó a tiempo",NEG
+"El espectáculo estuvo bien, aunque algo caro",NEU
+"Definitivamente lo recomiendo, vale la pena",POS
+"Los auriculares dejaron de funcionar en una semana",NEG
+"La experiencia fue neutra, nada malo ni bueno",NEU
+"Me sorprendió gratamente la calidad del material",POS
+"No cumplen lo que prometen en la descripción",NEG
+"El lugar estaba bien, aunque algo ruidoso",NEU
+"El doctor fue muy amable y profesional",POS
+"La pantalla venía rayada desde el inicio",NEG
+"El evento estuvo correcto, sin destacar",NEU
+"Todo salió perfecto, mejor imposible",POS
+"La maleta llegó golpeada y rota",NEG
+"El proceso de inscripción fue normal",NEU
+"Me encantó el trato recibido en la tienda",POS
+"No recomiendo este producto a nadie",NEG
+"Fue un trámite regular, nada complicado",NEU
+"Estoy feliz con el resultado final",POS
+"El cargador se dañó al primer uso",NEG
+"El hotel estaba bien, aunque lejos del centro",NEU
+"Excelente atención y rapidez en el servicio",POS
+"Muy mala experiencia, me siento estafado",NEG
+"El producto llegó en perfectas condiciones y antes de tiempo.","POS"
+"No me gustó la calidad, se dañó al segundo uso.","NEG"
+"El restaurante tenía buen ambiente pero la comida fue normal.","NEU"
+"Me encantó la serie, actores increíbles y gran historia.","POS"
+"La ropa perdió color después de un lavado, decepcionado.","NEG"
+"El viaje estuvo bien, aunque esperaba más paisajes.","NEU"
+"El teléfono tiene excelente cámara, muy recomendable.","POS"
+"El software tiene demasiados errores, muy frustrante.","NEG"
+"El evento fue entretenido pero demasiado largo.","NEU"
+"Excelente hotel, habitaciones cómodas y buen servicio.","POS"
+"El paquete nunca llegó, pésimo servicio de entrega.","NEG"
+"La película estuvo regular, con buenos efectos pero trama floja.","NEU"
+"La atención fue rápida y amable, quedé satisfecho.","POS"
+"El computador se calienta mucho, no vale la pena.","NEG"
+"El lugar no estaba mal, pero tampoco era especial.","NEU"
+"La conferencia fue muy inspiradora, aprendí bastante.","POS"
+"No funciona como prometen en la descripción.","NEG"
+"El juego es divertido aunque los gráficos no son los mejores.","NEU"
+"El libro fue fascinante, lo terminé en dos días.","POS"
+"La comida estaba fría y tardaron demasiado en servirla.","NEG"
+"El servicio estuvo aceptable, nada fuera de lo común.","NEU"
+"El personal fue muy atento, volveré sin dudarlo.","POS"
+"El producto vino con piezas faltantes, muy molesto.","NEG"
+"La clase fue buena pero demasiado teórica.","NEU"
+"El espectáculo fue impresionante, luces y música increíbles.","POS"
+"La aplicación consume demasiada batería, no me gusta.","NEG"
+"La atención telefónica fue útil, pero lenta.","NEU"
+"Me encantó el diseño del empaque, muy elegante.","POS"
+"El envío estaba incompleto, me siento estafado.","NEG"
+"El museo fue interesante, aunque un poco pequeño.","NEU"
+"Excelente experiencia de compra, todo muy fácil.","POS"
+"El televisor dejó de funcionar en una semana.","NEG"
+"El transporte fue puntual, aunque los asientos incómodos.","NEU"
+"El curso en línea fue muy enriquecedor, lo recomiendo.","POS"
+"La aspiradora hace mucho ruido y limpia mal.","NEG"
+"La tienda tenía variedad, aunque los precios altos.","NEU"
+"Todo salió mejor de lo esperado, muy satisfecho.","POS"
+"El café estaba quemado y sabía horrible.","NEG"
+"El parque estaba limpio y ordenado, una visita agradable.","NEU"
+"Gran calidad en los materiales, superó mis expectativas.","POS"
+"La experiencia en soporte técnico fue terrible.","NEG"
+"La exposición fue clara, aunque un poco repetitiva.","NEU"
+"El concierto fue espectacular, energía increíble.","POS"
+"El cargador no funciona, pésima compra.","NEG"
+"El lugar estaba tranquilo, perfecto para descansar.","NEU"
+"Recomiendo totalmente este producto, excelente compra.","POS"
+"El aire acondicionado no enfría nada, un desastre.","NEG"
+"El documental fue interesante pero algo largo.","NEU"

@@ -1,79 +1,130 @@
+# test_server.py
 import pytest
-from unittest.mock import patch, MagicMock
-
-# Importar directamente porque están en la misma carpeta
+from unittest.mock import patch
 from server import SentimentService
 import sentiment_pb2
 
 
+# -----------------------------
+# Fixtures
+# -----------------------------
 @pytest.fixture
-def mock_pipeline():
-    """Crea un pipeline simulado que devuelve POSITIVE por cada texto recibido"""
+def pipeline_simulado():
+    """
+    Crea un pipeline simulado que siempre devuelve POS con score 0.95.
+    """
     def fake_pipeline(inputs):
         if isinstance(inputs, list):
-            return [{"label": "POSITIVE", "score": 0.95} for _ in inputs]
+            return [{"label": "POS", "score": 0.95} for _ in inputs]
         else:
-            return [{"label": "POSITIVE", "score": 0.95}]
+            return [{"label": "POS", "score": 0.95}]
     return fake_pipeline
 
 
+# -----------------------------
+# Tests
+# -----------------------------
+def test_predict_un_texto(pipeline_simulado):
+    """
+    Test para un solo texto en Predict.
+    """
+    with patch("server.pipeline", return_value=pipeline_simulado):
+        servicio = SentimentService()
+        solicitud = sentiment_pb2.PredictRequest(text="Me gusta este servicio")
+        respuesta = servicio.Predict(solicitud, None)
 
-@pytest.fixture
-def mock_mlflow():
-    """Mock de mlflow con tracking de llamadas"""
-    with patch("server.mlflow") as mock_ml:
-        # Configurar run_id
-        mock_ml.start_run.return_value.__enter__.return_value.info.run_id = "run123"
-        yield mock_ml
-
-
-def test_predict_empty_string(mock_pipeline, mock_mlflow):
-    with patch("server.pipeline", return_value=mock_pipeline):
-        service = SentimentService()
-        req = sentiment_pb2.PredictRequest(text="")
-        resp = service.Predict(req, None)
-
-        assert resp.label == "POSITIVE"
-        assert 0 <= resp.score <= 1
+        assert respuesta.label == "POS"
+        assert isinstance(respuesta.score, float)
 
 
-def test_predict_batch_many_texts(mock_pipeline, mock_mlflow):
-    with patch("server.pipeline", return_value=mock_pipeline):
-        service = SentimentService()
-        req = sentiment_pb2.PredictBatchRequest(texts=["texto"] * 1000)
-        resp = service.PredictBatch(req, None)
+def test_predict_batch_varios(pipeline_simulado):
+    """
+    Test para varios textos en PredictBatch.
+    """
+    with patch("server.pipeline", return_value=pipeline_simulado):
+        servicio = SentimentService()
+        solicitud = sentiment_pb2.PredictBatchRequest(texts=["uno", "dos", "tres"])
+        respuesta = servicio.PredictBatch(solicitud, None)
 
-        assert len(resp.labels) == 1000
-        assert all(l == "POSITIVE" for l in resp.labels)
-
-
-def test_predict_invalid_input(mock_pipeline, mock_mlflow):
-    with patch("server.pipeline", return_value=mock_pipeline):
-        service = SentimentService()
-
-        bad_req = sentiment_pb2.PredictRequest()  # sin text
-        resp = service.Predict(bad_req, None)
-
-        assert resp.label == "POSITIVE"
-        assert isinstance(resp.score, float)
+        assert len(respuesta.labels) == 3
+        assert all(l == "POS" for l in respuesta.labels)
+        assert all(isinstance(s, float) for s in respuesta.scores)
 
 
-def test_mlflow_log_model_called(mock_pipeline, mock_mlflow):
-    with patch("server.pipeline", return_value=mock_pipeline):
-        service = SentimentService()
+def test_predict_texto_vacio(pipeline_simulado):
+    """
+    Test para texto vacío en Predict.
+    """
+    with patch("server.pipeline", return_value=pipeline_simulado):
+        servicio = SentimentService()
+        solicitud = sentiment_pb2.PredictRequest(text="")
+        respuesta = servicio.Predict(solicitud, None)
 
-        # Validar que se llamó a log_model
-        assert mock_mlflow.transformers.log_model.called
+        assert respuesta.label == "POS"
+        assert 0 <= respuesta.score <= 1
 
-        # Validar que se loggeó el parámetro huggingface_model_id
-        mock_mlflow.log_param.assert_any_call(
-            "huggingface_model_id", service.model_id
+
+def test_ping(pipeline_simulado):
+    """
+    Test del método Ping.
+    """
+    with patch("server.pipeline", return_value=pipeline_simulado):
+        servicio = SentimentService()
+        solicitud = sentiment_pb2.PingRequest()
+        respuesta = servicio.Ping(solicitud, None)
+
+        assert respuesta.status == "ok"
+
+
+
+def test_predict_batch_grande(pipeline_simulado, mlflow_simulado):
+    """
+    Test para predecir un batch grande de textos.
+    """
+    with patch("server.pipeline", return_value=pipeline_simulado):
+        servicio = SentimentService()
+        solicitud = sentiment_pb2.PredictBatchRequest(texts=["texto"] * 1000)
+        respuesta = servicio.PredictBatch(solicitud, None)
+
+        assert len(respuesta.labels) == 1000
+        assert all(l == "POSITIVE" for l in respuesta.labels)
+
+
+def test_predict_input_invalido(pipeline_simulado, mlflow_simulado):
+    """
+    Test para manejar un request sin texto (input inválido).
+    """
+    with patch("server.pipeline", return_value=pipeline_simulado):
+        servicio = SentimentService()
+        solicitud_invalida = sentiment_pb2.PredictRequest()
+        respuesta = servicio.Predict(solicitud_invalida, None)
+
+        assert respuesta.label == "POSITIVE"
+        assert isinstance(respuesta.score, float)
+
+
+def test_mlflow_log_model_llamado(pipeline_simulado, mlflow_simulado):
+    """
+    Valida que mlflow.transformers.log_model sea llamado durante la inicialización.
+    """
+    with patch("server.pipeline", return_value=pipeline_simulado):
+        servicio = SentimentService()
+
+        # Se llamó log_model
+        assert mlflow_simulado.transformers.log_model.called
+
+        # Se loggeó el parámetro huggingface_model_id
+        mlflow_simulado.log_param.assert_any_call(
+            "huggingface_model_id", servicio.model_id
         )
 
 
-def test_service_initialization_sets_model_and_clf(mock_pipeline, mock_mlflow):
-    with patch("server.pipeline", return_value=mock_pipeline):
-        service = SentimentService()
+def test_inicializacion_servicio(pipeline_simulado, mlflow_simulado):
+    """
+    Valida que el servicio inicializa correctamente el modelo y el pipeline.
+    """
+    with patch("server.pipeline", return_value=pipeline_simulado):
+        servicio = SentimentService()
 
-        assert service.model_id == "finiteautomata/beto-sentiment-analysis"
-        assert service.clf is not None
+        assert servicio.model_id == "finiteautomata/beto-sentiment-analysis"
+        assert servicio.clf is not None
