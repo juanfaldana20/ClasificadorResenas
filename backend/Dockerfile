@@ -1,35 +1,27 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
-# Variables para cachear modelos HuggingFace
-ENV TRANSFORMERS_CACHE=/models/transformers_cache \
-    HF_HOME=/models/huggingface \
-    PYTHONUNBUFFERED=1
-
-WORKDIR /app
-
-# Dependencias de sistema
+# Dependencias del sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential git curl ca-certificates \
+    build-essential git curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Instalar uv
-RUN pip install --upgrade pip && pip install uv
+RUN pip install uv
 
-# Copiar archivos
+WORKDIR /app
+
+# Copiar pyproject primero (para cache de dependencias normales)
 COPY pyproject.toml .
-COPY ML ./ML
 
-# Instalar dependencias usando uv (sin torch)
-RUN uv pip install --system -r pyproject.toml
+# Instalar dependencias normales (sin torch)
+RUN uv pip compile pyproject.toml -o requirements.txt && \
+    uv pip install --system -r requirements.txt --no-cache-dir
 
-# ⚡ Instalar torch versión CPU solamente
-RUN uv pip install --system torch==2.3.0+cpu --extra-index-url https://download.pytorch.org/whl/cpu
+# Instalar Torch (CPU only, sin CUDA)
+RUN pip install --no-cache-dir torch==2.6.0 --index-url https://download.pytorch.org/whl/cpu
 
-# Generar archivos gRPC (dentro de ML/)
-RUN python -m grpc_tools.protoc -I./ML --python_out=./ML --grpc_python_out=./ML ./ML/sentiment.proto
-
-# Descargar modelo BETO en build (opcional: acelera arranque)
-RUN python -c "from transformers import pipeline; pipeline('sentiment-analysis', model='finiteautomata/beto-sentiment-analysis')"
+# Copiar código
+COPY . .
 
 EXPOSE 50051
 
