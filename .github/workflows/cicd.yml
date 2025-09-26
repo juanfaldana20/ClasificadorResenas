@@ -19,6 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Login en Azure Container Registry
       - name: Azure ACR Login
         uses: azure/docker-login@v2
         with:
@@ -26,16 +27,19 @@ jobs:
           username: ${{ env.ACR_USERNAME }}
           password: ${{ env.ACR_PASSWORD }}
 
+      # Build & Push Backend (desde carpeta backend/)
       - name: Build & Push Backend
         run: |
-          docker build -f backend/Dockerfile -t $ACR_LOGIN_SERVER/reviews-backend:${{ github.sha }} .
+          docker build -t $ACR_LOGIN_SERVER/reviews-backend:${{ github.sha }} backend
           docker push  $ACR_LOGIN_SERVER/reviews-backend:${{ github.sha }}
 
+      # Build & Push Frontend (desde carpeta frontend/)
       - name: Build & Push Frontend
         run: |
-          docker build -f frontend/Dockerfile -t $ACR_LOGIN_SERVER/reviews-frontend:${{ github.sha }} .
+          docker build -t $ACR_LOGIN_SERVER/reviews-frontend:${{ github.sha }} frontend
           docker push  $ACR_LOGIN_SERVER/reviews-frontend:${{ github.sha }}
 
+      # Deploy Backend a App Service
       - name: Deploy Backend to App Service
         uses: azure/webapps-deploy@v3
         with:
@@ -43,6 +47,7 @@ jobs:
           publish-profile: ${{ env.PUBLISH_PROFILE_BE }}
           images: ${{ env.ACR_LOGIN_SERVER }}/reviews-backend:${{ github.sha }}
 
+      # Deploy Frontend a App Service
       - name: Deploy Frontend to App Service
         uses: azure/webapps-deploy@v3
         with:
