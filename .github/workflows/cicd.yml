@@ -1,0 +1,51 @@
+name: CI-CD ClasificadorResenas
+
+on:
+  push:
+    branches: [ "dev", "main" ]
+
+env:
+  ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
+  ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+  ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+  APP_SERVICE_BE: reviews-backend-app
+  APP_SERVICE_FE: reviews-frontend-app
+  PUBLISH_PROFILE_BE: ${{ secrets.PUBLISH_PROFILE_BE }}
+  PUBLISH_PROFILE_FE: ${{ secrets.PUBLISH_PROFILE_FE }}
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure ACR Login
+        uses: azure/docker-login@v2
+        with:
+          login-server: ${{ env.ACR_LOGIN_SERVER }}
+          username: ${{ env.ACR_USERNAME }}
+          password: ${{ env.ACR_PASSWORD }}
+
+      - name: Build & Push Backend
+        run: |
+          docker build -f backend/Dockerfile -t $ACR_LOGIN_SERVER/reviews-backend:${{ github.sha }} .
+          docker push  $ACR_LOGIN_SERVER/reviews-backend:${{ github.sha }}
+
+      - name: Build & Push Frontend
+        run: |
+          docker build -f frontend/Dockerfile -t $ACR_LOGIN_SERVER/reviews-frontend:${{ github.sha }} .
+          docker push  $ACR_LOGIN_SERVER/reviews-frontend:${{ github.sha }}
+
+      - name: Deploy Backend to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.APP_SERVICE_BE }}
+          publish-profile: ${{ env.PUBLISH_PROFILE_BE }}
+          images: ${{ env.ACR_LOGIN_SERVER }}/reviews-backend:${{ github.sha }}
+
+      - name: Deploy Frontend to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.APP_SERVICE_FE }}
+          publish-profile: ${{ env.PUBLISH_PROFILE_FE }}
+          images: ${{ env.ACR_LOGIN_SERVER }}/reviews-frontend:${{ github.sha }}
