@@ -20,18 +20,9 @@ RUN uv pip compile pyproject.toml -o requirements.txt && \
 # Instalar Torch (CPU only, sin CUDA)
 RUN pip install --no-cache-dir torch==2.6.0 --index-url https://download.pytorch.org/whl/cpu
 
-<<<<<<< HEAD
 # Copiar código
 COPY . .
-=======
-# Generar archivos gRPC (dentro de ML/)
-RUN python -m grpc_tools.protoc -I ./ML --python_out=./ML --grpc_python_out=./ML ./ML/sentiment.proto
-
-# ❌ Quitar precarga del modelo (causaba error en build)
-# RUN python -c "from transformers import pipeline; pipeline('sentiment-analysis', model='finiteautomata/beto-sentiment-analysis')"
->>>>>>> 3239739e77597bfb0c1db3f3678ef8e069722244
 
 EXPOSE 50051
 
 CMD ["python", "ML/server.py"]
-
