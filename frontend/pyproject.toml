@@ -1,0 +1,19 @@
+[project]
+name = "ml-frontend"
+version = "0.1.0"
+description = "Frontend Streamlit para clasificador"
+requires-python = ">=3.9"
+
+dependencies = [
+    "grpcio>=1.65.0",
+    "streamlit==1.50.0",
+    "pandas>=2.2.0",
+    "openpyxl>=3.1.2"  # para XLSX
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+index-url = "https://pypi.org/simple"

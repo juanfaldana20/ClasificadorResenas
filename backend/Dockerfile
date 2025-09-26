@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Variables para cachear modelos HuggingFace dentro del contenedor
+# Variables para cachear modelos HuggingFace
 ENV TRANSFORMERS_CACHE=/models/transformers_cache \
     HF_HOME=/models/huggingface \
     PYTHONUNBUFFERED=1
@@ -13,26 +13,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Instalar uv
-RUN pip install --upgrade pip \
-    && pip install uv
+RUN pip install --upgrade pip && pip install uv
 
-# Copiar pyproject para resolver dependencias
+# Copiar archivos
 COPY pyproject.toml .
+COPY ML ./ML
 
-# Generar archivo requirements.txt con uv
-RUN uv pip compile pyproject.toml -o requirements.txt
+# Instalar dependencias usando uv (sin torch)
+RUN uv pip install --system -r pyproject.toml
 
-# Instalar dependencias usando uv
-RUN uv pip install --system -r requirements.txt
+# ⚡ Instalar torch versión CPU solamente
+RUN uv pip install --system torch==2.3.0+cpu --extra-index-url https://download.pytorch.org/whl/cpu
 
-# Copiar el código del backend
-COPY ML/ ./ML
+# Generar archivos gRPC (dentro de ML/)
+RUN python -m grpc_tools.protoc -I./ML --python_out=./ML --grpc_python_out=./ML ./ML/sentiment.proto
 
 # Descargar modelo BETO en build (opcional: acelera arranque)
 RUN python -c "from transformers import pipeline; pipeline('sentiment-analysis', model='finiteautomata/beto-sentiment-analysis')"
 
-# Puerto gRPC
 EXPOSE 50051
 
-# Ejecutar servidor gRPC
 CMD ["python", "ML/server.py"]

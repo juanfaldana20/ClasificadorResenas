@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  backend:
+    build: ./backend
+    container_name: ml-backend
+    ports:
+      - "50051:50051"
+
+  frontend:
+    build: ./frontend
+    container_name: ml-frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - APP_GRPC_ADDR=backend:50051  # el frontend se conecta al backend
+    depends_on:
+      - backend
