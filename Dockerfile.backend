@@ -1,0 +1,38 @@
+FROM python:3.11-slim
+
+# Variables para cachear modelos HuggingFace dentro del contenedor
+ENV TRANSFORMERS_CACHE=/models/transformers_cache \
+    HF_HOME=/models/huggingface \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# Dependencias de sistema
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential git curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar uv
+RUN pip install --upgrade pip \
+    && pip install uv
+
+# Copiar pyproject para resolver dependencias
+COPY pyproject.toml .
+
+# Generar archivo requirements.txt con uv
+RUN uv pip compile pyproject.toml -o requirements.txt
+
+# Instalar dependencias usando uv
+RUN uv pip install --system -r requirements.txt
+
+# Copiar el código del backend
+COPY ML/ ./ML
+
+# Descargar modelo BETO en build (opcional: acelera arranque)
+RUN python -c "from transformers import pipeline; pipeline('sentiment-analysis', model='finiteautomata/beto-sentiment-analysis')"
+
+# Puerto gRPC
+EXPOSE 50051
+
+# Ejecutar servidor gRPC
+CMD ["python", "ML/server.py"]
