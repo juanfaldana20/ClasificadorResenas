@@ -1,34 +1,18 @@
 stages:
   - test
 
-run_tests:
+backend-tests:
   stage: test
-  image: python:3.10-slim   # Igual que tu Dockerfile
-  before_script:
-    - apt-get update && apt-get install -y --no-install-recommends build-essential git curl
-    - pip install uv
+  image: python:3.10-slim
   script:
-    # Verificar que el archivo existe
-    - test -f backend/ML/pyproject.toml || (echo "❌ pyproject.toml no encontrado" && exit 1)
-    
-    # Mostrar estructura (debug)
-    - pwd
-    - ls -R backend/ML
-    
-    # Instalar dependencias con uv
-    - cd backend/ML
+    - apt-get update && apt-get install -y build-essential git curl
+    - pip install uv
+    - echo "📂 Contenido del repo clonado:"
+    - ls -R $CI_PROJECT_DIR
+    - test -f $CI_PROJECT_DIR/backend/ML/pyproject.toml || (echo "❌ backend pyproject.toml no encontrado" && exit 1)
+    - cd $CI_PROJECT_DIR/backend/ML
     - uv pip compile pyproject.toml -o requirements.txt
     - uv pip install --system -r requirements.txt --no-cache-dir
-    
-    # Instalar torch CPU (como en tu Dockerfile)
-    - pip install --no-cache-dir torch==2.6.0 --index-url https://download.pytorch.org/whl/cpu
-    
-    # Instalar pytest si no está en pyproject.toml
     - pip install pytest
-    
-    # Ejecutar tests
-    - pytest codigos_test.py
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-
+    - echo "▶️ Ejecutando tests de backend"
+    - pytest codigos_test.py -v
