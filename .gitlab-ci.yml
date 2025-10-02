@@ -1,6 +1,7 @@
 stages:
   - test
   - build
+  - deploy
 
 # -------------------------------
 # Stage 1: Tests
@@ -19,10 +20,10 @@ backend-tests:
     - uv pip install --system -r requirements.txt --no-cache-dir
     - pip install pytest
     - echo "▶️ Ejecutando tests de backend"
-    - pytest ML/codigos_test.py -v   # tests del backend
+    - pytest ML/codigos_test.py -v
 
 # -------------------------------
-# Stage 2: Build Backend
+# Stage 2: Build + Push Backend
 # -------------------------------
 build-backend:
   stage: build
@@ -32,20 +33,33 @@ build-backend:
   variables:
     DOCKER_DRIVER: overlay2
   script:
+    - echo "🔑 Iniciando sesión en Azure ACR"
+    - echo $AZURE_ACR_PASSWORD | docker login aplicacionstreamlit.azurecr.io -u $AZURE_ACR_USERNAME --password-stdin
     - echo "🐳 Construyendo imagen backend..."
-    - docker build -t backend-test-build ./backend
+    - docker build -t aplicacionstreamlit.azurecr.io/reviews-backend:latest ./backend
+    - echo "⬆️ Pusheando imagen backend al ACR..."
+    - docker push aplicacionstreamlit.azurecr.io/reviews-backend:latest
+  only:
+    - main
 
 # -------------------------------
-# Stage 3: Build Frontend
+# Stage 3: Build + Push + Deploy Frontend
 # -------------------------------
-build-frontend:
-  stage: build
+build-deploy-frontend:
+  stage: deploy
   image: docker:24.0.5
   services:
     - docker:24.0.5-dind
   variables:
     DOCKER_DRIVER: overlay2
   script:
+    - echo "🔑 Iniciando sesión en Azure ACR"
+    - echo $AZURE_ACR_PASSWORD | docker login aplicacionstreamlit.azurecr.io -u $AZURE_ACR_USERNAME --password-stdin
     - echo "🐳 Construyendo imagen frontend..."
-    - docker build -t frontend-test-build ./frontend
-
+    - docker build -t aplicacionstreamlit.azurecr.io/frontend:latest ./frontend
+    - echo "⬆️ Pusheando imagen frontend al ACR..."
+    - docker push aplicacionstreamlit.azurecr.io/frontend:latest
+    - echo "🚀 Desplegando nueva imagen frontend en Azure Container Apps"
+    - az containerapp update --name frontend-app --resource-group $AZ_RESOURCE_GROUP --image aplicacionstreamlit.azurecr.io/frontend:latest
+  only:
+    - main
