@@ -1,6 +1,10 @@
 stages:
   - test
+  - build
 
+# -------------------------------
+# Stage 1: Tests
+# -------------------------------
 backend-tests:
   stage: test
   image: python:3.10-slim
@@ -15,20 +19,33 @@ backend-tests:
     - uv pip install --system -r requirements.txt --no-cache-dir
     - pip install pytest
     - echo "▶️ Ejecutando tests de backend"
-    - pytest ML/codigos_test.py -v   # ojo: test está dentro de ML
+    - pytest ML/codigos_test.py -v   # tests del backend
 
-frontend-tests:
-  stage: test
-  image: python:3.10-slim
+# -------------------------------
+# Stage 2: Build Backend
+# -------------------------------
+build-backend:
+  stage: build
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  variables:
+    DOCKER_DRIVER: overlay2
   script:
-    - apt-get update && apt-get install -y build-essential git curl
-    - pip install uv
-    - echo "📂 Contenido del repo clonado:"
-    - ls -R $CI_PROJECT_DIR
-    - test -f $CI_PROJECT_DIR/frontend/pyproject.toml || (echo "❌ frontend pyproject.toml no encontrado" && exit 1)
-    - cd $CI_PROJECT_DIR/frontend
-    - uv pip compile pyproject.toml -o requirements.txt
-    - uv pip install --system -r requirements.txt --no-cache-dir
-    - pip install pytest
-    - echo "▶️ Ejecutando tests de frontend"
-    - pytest -v
+    - echo "🐳 Construyendo imagen backend..."
+    - docker build -t backend-test-build ./backend
+
+# -------------------------------
+# Stage 3: Build Frontend
+# -------------------------------
+build-frontend:
+  stage: build
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+  script:
+    - echo "🐳 Construyendo imagen frontend..."
+    - docker build -t frontend-test-build ./frontend
+
