@@ -73,7 +73,7 @@ build-deploy-frontend:
     - docker push $AZURE_ACR_SERVER/frontend:latest
 
     - echo "🚀 Desplegando nueva imagen frontend en Azure Container Apps"
-    - az containerapp update --name frontend-app --resource-group $AZ_RESOURCE_GROUP --image $AZURE_ACR_SERVER/frontend:latest
+    - az containerapp update --name frontendapp --resource-group $AZ_RESOURCE_GROUP --image $AZURE_ACR_SERVER/frontend:latest
   only:
     - main
     - develop
