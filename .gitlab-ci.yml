@@ -12,14 +12,14 @@ backend-tests:
   script:
     - apt-get update && apt-get install -y build-essential git curl
     - pip install uv
-    - echo "📂 Contenido del repo clonado:"
+    - echo "Contenido del repo clonado:"
     - ls -R $CI_PROJECT_DIR
     - test -f $CI_PROJECT_DIR/backend/pyproject.toml || (echo "❌ backend pyproject.toml no encontrado" && exit 1)
     - cd $CI_PROJECT_DIR/backend
     - uv pip compile pyproject.toml -o requirements.txt
     - uv pip install --system -r requirements.txt --no-cache-dir
     - pip install pytest
-    - echo "▶️ Ejecutando tests de backend"
+    - echo "Ejecutando tests de backend"
     - pytest ML/codigos_test.py -v
 
 # -------------------------------
@@ -33,11 +33,11 @@ build-backend:
   variables:
     DOCKER_DRIVER: overlay2
   script:
-    - echo "🔑 Iniciando sesión en Azure ACR"
+    - echo "Iniciando sesión en Azure ACR"
     - echo $AZURE_ACR_PASSWORD | docker login aplicacionstreamlit.azurecr.io -u $AZURE_ACR_USERNAME --password-stdin
-    - echo "🐳 Construyendo imagen backend..."
+    - echo "Construyendo imagen backend..."
     - docker build -t aplicacionstreamlit.azurecr.io/reviews-backend:latest ./backend
-    - echo "⬆️ Pusheando imagen backend al ACR..."
+    - echo "Pusheando imagen backend al ACR..."
     - docker push aplicacionstreamlit.azurecr.io/reviews-backend:latest
   only:
     - main
@@ -59,17 +59,17 @@ build-deploy-frontend:
   before_script:
     - apk add --no-cache docker-cli
   script:
-    - echo "🔑 Login en Azure con Service Principal"
+    - echo "Login en Azure con Service Principal"
     - az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
     - az account set --subscription $AZURE_SUBSCRIPTION_ID
 
-    - echo "🔑 Login en Azure Container Registry"
+    - echo "Login en Azure Container Registry"
     - echo $AZURE_ACR_PASSWORD | docker login $AZURE_ACR_SERVER -u $AZURE_ACR_USERNAME --password-stdin
 
-    - echo "🐳 Construyendo imagen frontend..."
+    - echo "Construyendo imagen frontend..."
     - docker build -t $AZURE_ACR_SERVER/frontend:latest ./frontend
 
-    - echo "⬆️ Pusheando imagen frontend al ACR..."
+    - echo "Pusheando imagen frontend al ACR..."
     - docker push $AZURE_ACR_SERVER/frontend:latest
 
     - echo "🚀 Desplegando nueva imagen frontend en Azure Container Apps"
