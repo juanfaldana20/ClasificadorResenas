@@ -48,27 +48,33 @@ build-backend:
 # -------------------------------
 build-deploy-frontend:
   stage: deploy
-  image: mcr.microsoft.com/azure-cli:2.61.0   # Imagen con Azure CLI
+  image: mcr.microsoft.com/azure-cli:2.61.0   # trae solo 'az'
   services:
     - docker:24.0.5-dind
   variables:
     DOCKER_DRIVER: overlay2
   script:
+    # 👇 instalar docker-cli dentro del contenedor
+    - apk add --no-cache docker-cli
+
     - echo "🔑 Login en Azure con Service Principal"
     - az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
     - az account set --subscription $AZURE_SUBSCRIPTION_ID
 
     - echo "🔑 Login en Azure Container Registry"
-    - echo $AZURE_ACR_PASSWORD | docker login aplicacionstreamlit.azurecr.io -u $AZURE_ACR_USERNAME --password-stdin
+    - echo $AZURE_ACR_PASSWORD | docker login $AZURE_ACR_SERVER -u $AZURE_ACR_USERNAME --password-stdin
 
     - echo "🐳 Construyendo imagen frontend..."
-    - docker build -t aplicacionstreamlit.azurecr.io/frontend:latest ./frontend
+    - docker build -t $AZURE_ACR_SERVER/frontend:latest ./frontend
 
     - echo "⬆️ Pusheando imagen frontend al ACR..."
-    - docker push aplicacionstreamlit.azurecr.io/frontend:latest
+    - docker push $AZURE_ACR_SERVER/frontend:latest
 
     - echo "🚀 Desplegando nueva imagen frontend en Azure Container Apps"
-    - az containerapp update --name frontend-app --resource-group $AZ_RESOURCE_GROUP --image aplicacionstreamlit.azurecr.io/frontend:latest
+    - az containerapp update \
+        --name frontend-app \
+        --resource-group $AZ_RESOURCE_GROUP \
+        --image $AZURE_ACR_SERVER/frontend:latest
   only:
     - main
     - develop
