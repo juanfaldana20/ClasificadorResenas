@@ -3,17 +3,8 @@ variables:
   PYTHON_VERSION: "3.11"
   BASE_LAYER: "bookworm-slim"
 
-  # Azure Container Registry
-  ACR_NAME: "aplicacionstreamlit"
-  ACR_LOGIN_SERVER: "aplicacionstreamlit.azurecr.io"
-  BACKEND_IMAGE: "aplicacionstreamlit.azurecr.io/reviews-backend:latest"
-  FRONTEND_IMAGE: "aplicacionstreamlit.azurecr.io/frontend:latest"
-
 stages:
   - test
-  - build-backend
-  - build-frontend
-  - deploy-frontend
 
 # 1️⃣ Tests del backend
 run_tests:
@@ -25,49 +16,5 @@ run_tests:
   script:
     - uv pip install --system pytest
     - pytest codigos_test.py
-  cache:
-    key:
-      files:
-        - backend/ML/pyproject.toml
-    paths:
-      - .venv/
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-
-# 2️⃣ Build + Push Backend (NO se despliega)
-build_backend:
-  stage: build-backend
-  image: docker:28.4.0-cli
-  services:
-    - docker:28.4.0-dind
-  before_script:
-    - echo "$AZURE_REGISTRY_PASSWORD" | docker login $ACR_LOGIN_SERVER -u "$AZURE_REGISTRY_USER" --password-stdin
-  script:
-    - docker build -t $BACKEND_IMAGE backend/
-    - docker push $BACKEND_IMAGE
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-
-# 3️⃣ Build + Push Frontend
-build_frontend:
-  stage: build-frontend
-  image: docker:28.4.0-cli
-  services:
-    - docker:28.4.0-dind
-  before_script:
-    - echo "$AZURE_REGISTRY_PASSWORD" | docker login $ACR_LOGIN_SERVER -u "$AZURE_REGISTRY_USER" --password-stdin
-  script:
-    - docker build -t $FRONTEND_IMAGE frontend/
-    - docker push $FRONTEND_IMAGE
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-
-# 4️⃣ Deploy Frontend en Azure Container Apps
-deploy_frontend:
-  stage: deploy-frontend
-  image: mcr.microsoft.com/azure-cli
-  script:
-    - az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
-    - az containerapp update --name frontend-app --resource-group tu-resource-group --image $FRONTEND_IMAGE
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
