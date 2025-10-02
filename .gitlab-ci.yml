@@ -41,7 +41,7 @@ build-backend:
     - docker push aplicacionstreamlit.azurecr.io/reviews-backend:latest
   only:
     - main
-    - deploy
+    - develop
 
 # -------------------------------
 # Stage 3: Build + Push + Deploy Frontend
@@ -64,4 +64,4 @@ build-deploy-frontend:
     - az containerapp update --name frontend-app --resource-group $AZ_RESOURCE_GROUP --image aplicacionstreamlit.azurecr.io/frontend:latest
   only:
     - main
-    - deploy
+    - develop
