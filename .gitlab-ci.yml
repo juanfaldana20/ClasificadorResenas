@@ -9,10 +9,26 @@ backend-tests:
     - pip install uv
     - echo "📂 Contenido del repo clonado:"
     - ls -R $CI_PROJECT_DIR
-    - test -f $CI_PROJECT_DIR/backend/ML/pyproject.toml || (echo "❌ backend pyproject.toml no encontrado" && exit 1)
-    - cd $CI_PROJECT_DIR/backend/ML
+    - test -f $CI_PROJECT_DIR/backend/pyproject.toml || (echo "❌ backend pyproject.toml no encontrado" && exit 1)
+    - cd $CI_PROJECT_DIR/backend
     - uv pip compile pyproject.toml -o requirements.txt
     - uv pip install --system -r requirements.txt --no-cache-dir
     - pip install pytest
     - echo "▶️ Ejecutando tests de backend"
-    - pytest codigos_test.py -v
+    - pytest ML/codigos_test.py -v   # ojo: test está dentro de ML
+
+frontend-tests:
+  stage: test
+  image: python:3.10-slim
+  script:
+    - apt-get update && apt-get install -y build-essential git curl
+    - pip install uv
+    - echo "📂 Contenido del repo clonado:"
+    - ls -R $CI_PROJECT_DIR
+    - test -f $CI_PROJECT_DIR/frontend/pyproject.toml || (echo "❌ frontend pyproject.toml no encontrado" && exit 1)
+    - cd $CI_PROJECT_DIR/frontend
+    - uv pip compile pyproject.toml -o requirements.txt
+    - uv pip install --system -r requirements.txt --no-cache-dir
+    - pip install pytest
+    - echo "▶️ Ejecutando tests de frontend"
+    - pytest -v
