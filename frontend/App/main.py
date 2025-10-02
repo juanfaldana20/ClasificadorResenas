@@ -428,7 +428,7 @@ def main():
     """
     Construye la UI con cuatro pestañas y prueba de salud al inicio.
     """
-    st.set_page_config(page_title="Sistema de Reseñas con IA", page_icon="🍽", layout="wide")
+    st.set_page_config(page_title="App Reseñas con IA ", page_icon="🍽", layout="wide")
     apply_custom_css()
 
     st.markdown('<h1 class="main-title">🍽 Sistema de Reseñas de Restaurante con IA</h1>', unsafe_allow_html=True)
