@@ -189,7 +189,7 @@ def ui_write_review():
     # Área de texto para la reseña
     review_text = st.text_area(
         "",
-        placeholder="Escribe tu reseña aquí...",
+        placeholder="Escribe tu reseña aquí... porfavor",
         height=120,
         key="review_textarea",
         label_visibility="collapsed",
