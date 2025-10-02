@@ -55,10 +55,7 @@ build-deploy-frontend:
     DOCKER_DRIVER: overlay2
   script:
     - echo "🔑 Login en Azure con Service Principal"
-    - az login --service-principal \
-        -u $AZURE_CLIENT_ID \
-        -p $AZURE_CLIENT_SECRET \
-        --tenant $AZURE_TENANT_ID
+    - az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
     - az account set --subscription $AZURE_SUBSCRIPTION_ID
 
     - echo "🔑 Login en Azure Container Registry"
@@ -71,10 +68,8 @@ build-deploy-frontend:
     - docker push aplicacionstreamlit.azurecr.io/frontend:latest
 
     - echo "🚀 Desplegando nueva imagen frontend en Azure Container Apps"
-    - az containerapp update \
-        --name frontend-app \
-        --resource-group $AZ_RESOURCE_GROUP \
-        --image aplicacionstreamlit.azurecr.io/frontend:latest
+    - az containerapp update --name frontend-app --resource-group $AZ_RESOURCE_GROUP --image aplicacionstreamlit.azurecr.io/frontend:latest
   only:
     - main
     - develop
+
