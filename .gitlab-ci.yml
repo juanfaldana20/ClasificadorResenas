@@ -48,17 +48,23 @@ build-backend:
 # -------------------------------
 build-deploy-frontend:
   stage: deploy
-  image: mcr.microsoft.com/azure-cli:2.61.0   # trae solo 'az'
+  image: mcr.microsoft.com/azure-cli:2.61.0   # Imagen con Azure CLI
   services:
-    - docker:24.0.5-dind
+    - name: docker:24.0.5-dind
+      alias: docker
   variables:
     DOCKER_DRIVER: overlay2
-  script:
-    # 👇 instalar docker-cli dentro del contenedor
+    DOCKER_HOST: tcp://docker:2375      # 👈 le decimos al cliente que use el dind
+    DOCKER_TLS_CERTDIR: ""              # 👈 desactivamos TLS (porque está deshabilitado por defecto en dind)
+  before_script:
+    # Instalamos el cliente Docker
     - apk add --no-cache docker-cli
-
+  script:
     - echo "🔑 Login en Azure con Service Principal"
-    - az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+    - az login --service-principal \
+        -u $AZURE_CLIENT_ID \
+        -p $AZURE_CLIENT_SECRET \
+        --tenant $AZURE_TENANT_ID
     - az account set --subscription $AZURE_SUBSCRIPTION_ID
 
     - echo "🔑 Login en Azure Container Registry"
@@ -78,4 +84,3 @@ build-deploy-frontend:
   only:
     - main
     - develop
-
