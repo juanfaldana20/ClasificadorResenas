@@ -29,8 +29,8 @@ run_tests:
     key:
       files:
         - backend/ML/pyproject.toml
-      paths:
-        - .venv/
+    paths:
+      - .venv/
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
