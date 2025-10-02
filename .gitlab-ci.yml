@@ -1,20 +1,23 @@
-variables:
-  UV_VERSION: "0.5"
-  PYTHON_VERSION: "3.11"
-  BASE_LAYER: "bookworm-slim"
-
 stages:
   - test
 
-# 1️⃣ Tests del backend
 run_tests:
   stage: test
-  image: ghcr.io/astral-sh/uv:${UV_VERSION}-python${PYTHON_VERSION}-${BASE_LAYER}
+  image: python:3.10-slim   # igual que el Dockerfile
   before_script:
-    - apt-get update && apt-get install -y make libgl1-mesa-glx libglib2.0-0
-    - cd backend/ML
+    - apt-get update && apt-get install -y --no-install-recommends build-essential git curl
+    - pip install uv
   script:
-    - uv pip install --system pytest
+    - cd backend/ML
+    # Generar requirements desde pyproject.toml (como en tu Dockerfile)
+    - uv pip compile pyproject.toml -o requirements.txt
+    - uv pip install --system -r requirements.txt --no-cache-dir
+    # Instalar torch CPU (igual que en Dockerfile)
+    - pip install --no-cache-dir torch==2.6.0 --index-url https://download.pytorch.org/whl/cpu
+    # Instalar pytest si no está en pyproject.toml
+    - pip install pytest
+    # Correr tests
     - pytest codigos_test.py
   rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_COMMIT_BRANCH == "develop"'
