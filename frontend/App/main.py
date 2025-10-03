@@ -431,7 +431,7 @@ def main():
     st.set_page_config(page_title="App Reseñas con IA ", page_icon="🍽", layout="wide")
     apply_custom_css()
 
-    st.markdown('<h1 class="main-title">🍽 Sistema de Reseñas de Restaurante con IA</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-title">🍽 HM4L))=bS;,RTdk{$/KLqT)G1#PZyvSistema de Reseñas de Restaurante con IA</h1>', unsafe_allow_html=True)
 
     # Verificar conexión gRPC si está disponible
     if GRPC_AVAILABLE:
