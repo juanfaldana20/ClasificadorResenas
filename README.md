@@ -157,15 +157,8 @@ Enlace al tablero Kanban del proyecto:
   (por ejemplo: https://github.com/tu-org/tu-repo/projects/1 o Trello/Jira equivalente)
 
 
-## Notas y solución de problemas (FAQ)
-- La UI abre pero no muestra resultados de IA:
-  - Asegúrate de que el servicio gRPC esté corriendo (python ML/server.py) y que APP_GRPC_ADDR apunte a ese servicio.
-  - Verifica que los stubs sentiment_pb2*.py existan en ML/ y sean importables.
-- Error en Docker por rutas con mayúsculas/minúsculas:
-  - Actualiza docker-compose.yaml a App/main.py (A mayúscula) o renombra los directorios a minúsculas y ajusta imports.
-- MLflow en Docker no levanta:
-  - Usa la opción A (local) o ajusta el servicio mlflow del compose como se describe.
-- Puertos ocupados:
-  - Cambia los puertos mapeados en docker-compose.yaml o al ejecutar mlflow y streamlit.
+
+
+
  
 
